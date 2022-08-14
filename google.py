@@ -11,7 +11,10 @@ class WebsiteDetails:
 
 def search(driver, keys_to_search: str):
     driver.get('https://www.google.ro/')
-    driver.find_element(By.XPATH, '//*[@id="L2AGLb"]/div').click()
+    try:
+        driver.find_element(By.XPATH, '//*[@id="L2AGLb"]/div').click()
+    except:
+        pass
     searchBar = driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input')
     searchBar.send_keys(keys_to_search)
     searchBar.submit()
