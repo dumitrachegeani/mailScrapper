@@ -29,6 +29,7 @@ def is_forbidden(link: str):
     return False
 
 
+# put relevant child links in the first five
 def child_webdetails_sorted(passed_children_links: List['google.WebsiteDetails']):
     result_list = []
     for passed_child in passed_children_links:
@@ -66,7 +67,7 @@ def get_children_of(driver: 'webdriver'):
             continue
     return child_webdetails_sorted(passed_children_links)
 
-
+# filter google response links and also get their children (sublinks)
 def get_all_web_details_of(web_details: List['google.WebsiteDetails'], driver: 'webdriver'):
     passed_web_details = []
     for web_detail in web_details:
@@ -85,7 +86,7 @@ def get_all_web_details_of(web_details: List['google.WebsiteDetails'], driver: '
     return passed_web_details
 
 
-# task to be runned
+# task to be run
 def task(row, id_thread):
     # open output files for current thread
     output_emails = open(str(id_thread) + 'thread_emails.csv', 'a+')
@@ -124,6 +125,8 @@ def task(row, id_thread):
             phones_from = utils.extract_phones_from(page_source, website.link)
             all_phones.extend(phones_from)
             print('Got ' + str(len(mails_from)) + ' emails and ' + str(len(phones_from)) + ' phones from that page')
+        print(all_emails)
+        print(all_phones)
         compressed_emails = utils.compress_emails(all_emails)
         compressed_phones = utils.compress_phones(all_phones)
         print('Writing ' + str(len(compressed_emails)) + ' emails and ' + str(
@@ -132,6 +135,7 @@ def task(row, id_thread):
         utils.writePhones(output_phones, compressed_phones, firm)
 
 
+# put them 10 per row
 def read_input():
     rows = []
     with open('input.csv') as f:
