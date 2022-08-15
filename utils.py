@@ -19,6 +19,9 @@ FORBIDEN_WEBSITES = [
     "romanian-companies.eu/"
 ]
 FORBIDEN_MAIL_WORDS = [
+    ".png",
+    ".jpg",
+    ".jpeg",
     "Dpo",
     "Dataprotection",
     "Anaf",

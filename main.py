@@ -27,8 +27,8 @@ class Phone:
 
 
 def task(row, id_thread):
-    output_emails = open(str(id_thread) + 'thread_emails.csv', 'w+')
-    output_phones = open(str(id_thread) + 'thread_phones.csv', 'w+')
+    output_emails = open(str(id_thread) + 'thread_emails.csv', 'a+')
+    output_phones = open(str(id_thread) + 'thread_phones.csv', 'a+')
 
     # opening the driver
     driver = webdriver.Chrome(ChromeDriverManager().install())
