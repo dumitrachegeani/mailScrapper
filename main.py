@@ -111,13 +111,26 @@ if __name__ == '__main__':
             line = line.strip()
             # separate the columns
             line = line.split(',')
-            # save the line for use later
-            rows.append(line)
-    # print(len(rows)) 22129
+            # divide it in 10 firms per row
+            line_1 = line[0:10]
+            line_2 = line[10:20]
+            line_3 = line[20:30]
+            line_4 = line[30:40]
+            line_5 = line[40:50]
+            rows.append(line_1)
+            rows.append(line_2)
+            rows.append(line_3)
+            rows.append(line_4)
+            rows.append(line_5)
+    # print(len(rows)) #22129
+
     MAX = len(rows)
     for i in range(0, MAX, THREADS):
         threads = []
-        print('Finished 150 firms, switching IP...')
+        log_file = open('firms.log', 'a+')
+        switching_ip___ = 'Finished 60 firms, switching IP...'
+        print(switching_ip___)
+        log_file.write(switching_ip___)
         os.system('windscribe-cli connect "US Central"')
 
         for thread_no in range(0, THREADS):
