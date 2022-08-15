@@ -1,24 +1,29 @@
-import random
 import re
-import time
+from typing import List, Dict
 import phonenumbers
-from selenium.webdriver.common.by import By
 
-import google
-
-FORBIDEN_WEBSITES = [
-    "listafirme.ro/",
-    "termene.ro/",
-    "indaco.ro/",
+FORBIDDEN_WEBSITES = [
+    "listafirme",
+    "termene",
+    "indaco",
     "lege5.ro",
-    "totalfirme.ro/",
-    "expose.ro/",
-    "confidas.ro/",
-    "lista-firme-romania.ro/",
+    "totalfirme",
+    "expose",
+    "confidas",
+    "lista-firme-romania",
     "cloudflare.com",
-    "romanian-companies.eu/"
+    "romanian-companies",
+    'mail',
+    'risco.ro/autentificare,',
+    'risco.ro/cont-nou',
+    'risco.ro/rapoarte-bonitate',
+    'paginiaurii.ro/contact/',
+    'aginiaurii.ro/despre-noi',
+    'paginiaurii.ro/despre-noi-videoclip',
+    'paginiaurii.ro/',
+
 ]
-FORBIDEN_MAIL_WORDS = [
+FORBIDDEN_MAIL_WORDS = [
     ".png",
     ".jpg",
     ".jpeg",
@@ -37,80 +42,84 @@ FORBIDEN_MAIL_WORDS = [
 ]
 
 
-def delay():
-    time.sleep(random.randrange(2, 5))
+class Email:
+    def __init__(self, email, link):
+        self.email = email
+        self.link = link
+        self.count = 1
+
+    def __str__(self):
+        return self.email + ',' + str(self.count) + ',' + self.link
+
+    def __repr__(self):
+        return self.__str__()
 
 
-def writeToCsvRow(f, list):
-    for elem in list:
-        try:
-            f.write(elem + ',')
-        except:
-            print("unicode error")
-    f.write('\n')
+class Phone:
+    def __init__(self, phone, link):
+        self.phone = phone
+        self.link = link
+        self.count = 1
+
+    def __str__(self):
+        return self.phone + ',' + str(self.count) + ',' + self.link
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def writeEmails(f, all_emails, firm):
     for email in all_emails:
-        # try:
-        f.write(firm + ',' + email.email + ',' + str(email.count) + ',' + email.site + '\n')
-        # except:
-        #     print("unicode error")
-        # f.write('\n')
+        f.write(email.__str__() + '\n')
     f.flush()
 
 
 def writePhones(f, all_phones, firm):
     for phone in all_phones:
-        # try:
-        f.write(str(firm) + ',' + str(phone.phone) + ',' + str(phone.count) + ',' + str(phone.site) + '\n')
-        # except:
-        #     print("unicode error")
-        # f.write('\n')
+        f.write(phone.__str__() + '\n')
     f.flush()
 
 
-def filter_websites(website_details):
-    filtered_websites = []
-    for website_detail in website_details:
-        link: str = website_detail.link
-        if not any(word in link for word in FORBIDEN_WEBSITES):
-            filtered_websites.append(website_detail)
-    return filtered_websites
-
-
 def not_forbidden(email):
-    for word in FORBIDEN_MAIL_WORDS:
+    for word in FORBIDDEN_MAIL_WORDS:
         if word in email:
             return False
     return True
 
 
-def extract_mails_from(page_source):
+def extract_mails_from(page_source, link):
+    result = []
     emails = re.findall(r'[\w.+-]+@[\w-]+\.[\w.-]+', page_source)
-    return filter(lambda email: not_forbidden(email), emails)
+    for email in emails:
+        if not_forbidden(email):
+            result.append(Email(email, link))
+    return result
 
 
-def extract_phones_from(page_source):
-    return [match.number.national_number for match in phonenumbers.PhoneNumberMatcher(page_source, "RO")]
+def extract_phones_from(page_source, link):
+    return [Phone('0' + str(number), link) for number in
+            [match.number.national_number for match in phonenumbers.PhoneNumberMatcher(page_source, "RO")]]
 
 
-# returns the list of WensiteDetails from the first links
-def extract_links_from(driver):
-    good_words = ['contact', 'despre', 'informati', 'ajutor']
-    list = []
-    ordered_list = []
-    for link in driver.find_elements(By.TAG_NAME, 'a'):
-        try:
-            href = link.get_attribute('href')
-            text = link.text
-        except:
-            continue
-        if href is None or text is None:
-            continue
-        list.append(google.WebsiteDetails(href, text))
-    for item in list:
-        for word in good_words:
-            if word in item.link:
-                ordered_list.append(item)
-    return list[:5]
+def compress_emails(all_emails: List['Email']):
+    email_map: Dict[str, Email] = dict()
+    final_list = []
+    for email in all_emails:
+        if email.email not in email_map:
+            email_map[email.email] = email
+            final_list.append(email)
+        else:
+            email_map[email.email].count += 1
+    return final_list
+
+
+def compress_phones(all_phones: List['Phone']):
+    phone_map: Dict[str, Phone] = dict()
+    final_list = []
+    for phone in all_phones:
+        if phone.phone not in phone_map:
+            phone_map[phone.phone] = phone
+            final_list.append(phone)
+        else:
+            phone_map[phone.phone].count += 1
+    return final_list
