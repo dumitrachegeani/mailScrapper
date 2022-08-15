@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 
+
 class WebsiteDetails:
     def __init__(self, link, desc):
         self.link = link
@@ -19,11 +20,15 @@ def search(driver, keys_to_search: str):
     searchBar.send_keys(keys_to_search)
     searchBar.submit()
 
+
 def web_element_to_website_details(responses):
     website_details = []
     for response in responses:
         arr = response.text.split('\n')
-        description = arr[1] + arr[0]
+        try:
+            description = arr[1] + arr[0]
+        except:
+            description = 'No description'
         link = response.find_element(By.TAG_NAME, 'a').get_attribute('href')
         website_details.append(WebsiteDetails(link, description))
     return website_details
